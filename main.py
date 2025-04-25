@@ -9,39 +9,37 @@ st.title("🏏 IPL Match Tracker")
 # IPL teams
 team_names = ["CSK", "MI", "KKR", "SRH", "RCB", "GT"]
 
-# Initialize session state for scores and match history
+# Initialize session state
 if 'points_table' not in st.session_state:
     st.session_state.points_table = {team: 0 for team in team_names}
-
 if 'match_history' not in st.session_state:
     st.session_state.match_history = []
 
 # Match input form
-with st.form("match_form"):
-    st.subheader("Enter Match Result")
+st.subheader("Enter Match Result")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        team1 = st.selectbox("Team 1", team_names, key="team1")
-    with col2:
-        team2 = st.selectbox("Team 2", [team for team in team_names if team != team1], key="team2")
+col1, col2 = st.columns(2)
+team1 = col1.selectbox("Team 1", team_names)
+team2 = col2.selectbox("Team 2", [team for team in team_names if team != team1])
 
-    winner = st.radio("Winner", options=[team1, team2], horizontal=True)
+# Dynamically update winner options
+if team1 and team2:
+    winner = st.radio("Select Winner", [team1, team2])
+else:
+    winner = None
 
-    submit = st.form_submit_button("Submit Match")
+if st.button("Submit Match") and winner:
+    # Add match to history
+    match = {
+        "Team 1": team1,
+        "Team 2": team2,
+        "Winner": winner
+    }
+    st.session_state.match_history.append(match)
 
-    if submit:
-        # Add match to history
-        match = {
-            "Team 1": team1,
-            "Team 2": team2,
-            "Winner": winner
-        }
-        st.session_state.match_history.append(match)
-
-        # Update points
-        st.session_state.points_table[winner] += 2
-        st.success(f"{winner} won! 2 points added.")
+    # Update points
+    st.session_state.points_table[winner] += 2
+    st.success(f"{winner} won! 2 points added.")
 
 # Display Points Table
 st.subheader("🏆 Points Table")
